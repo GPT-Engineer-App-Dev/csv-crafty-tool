@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
 import Papa from 'papaparse';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,18 +9,18 @@ const CSVEditor = () => {
   const [data, setData] = useState([]);
   const [headers, setHeaders] = useState([]);
 
-  const onDrop = useCallback((acceptedFiles) => {
-    const file = acceptedFiles[0];
-    Papa.parse(file, {
-      complete: (results) => {
-        setHeaders(results.data[0]);
-        setData(results.data.slice(1));
-      },
-      header: false,
-    });
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      Papa.parse(file, {
+        complete: (results) => {
+          setHeaders(results.data[0]);
+          setData(results.data.slice(1));
+        },
+        header: false,
+      });
+    }
+  };
 
   const handleEdit = (rowIndex, columnIndex, value) => {
     const newData = [...data];
@@ -57,13 +56,8 @@ const CSVEditor = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">CSV Editor</h1>
-      <div {...getRootProps()} className="border-2 border-dashed border-gray-300 p-4 mb-4 text-center cursor-pointer">
-        <input {...getInputProps()} />
-        {isDragActive ? (
-          <p>Drop the CSV file here ...</p>
-        ) : (
-          <p>Drag 'n' drop a CSV file here, or click to select a file</p>
-        )}
+      <div className="mb-4">
+        <Input type="file" accept=".csv" onChange={handleFileUpload} />
       </div>
       {data.length > 0 && (
         <>
